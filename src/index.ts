@@ -50,9 +50,6 @@ client.on("messageCreate", async (message) => {
         // get list of all members of guild
         const memberList = await guild.members.fetch({});
         const userInGuild = memberList.find((u) => {
-            console.log(
-                u.user.username + "#" + u.user.discriminator + " === " + userTag
-            );
             return u.user.username + "#" + u.user.discriminator === userTag;
         });
 
