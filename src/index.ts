@@ -9,7 +9,7 @@ import { logVerificationErrorMessage } from "./functions/admin-logger";
  * Create a new Discord Client and set its intents to determine which events
  * the bot will receive information about.
  */
-const client = new Client({
+export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -45,7 +45,10 @@ client.on("messageCreate", async (message) => {
         const guild: Guild | undefined = client.guilds.cache.get(
             config.GUILD_ID
         );
-        if (!guild) throw new Error("invalid guild");
+        if (!guild) {
+            logVerificationErrorMessage(userTag, client);
+            return;
+        }
 
         // get list of all members of guild
         const memberList = await guild.members.fetch({});
