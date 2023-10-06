@@ -39,7 +39,7 @@ client.on("messageCreate", async (message) => {
         let userTag: string = data[2];
 
         // updated for new username strings
-        if (!userTag.includes("#")) userTag = userTag + "#0";
+        if (!userTag.includes("#")) userTag = userTag.toLowerCase() + "#0";
 
         // find the guild the user is in
         const guild: Guild | undefined = client.guilds.cache.get(
