@@ -21,7 +21,7 @@ export const verifyUser = async (user: User, client: Client, guild: Guild) => {
         // add verified role
         await member.roles.add(role);
     } catch (e) {
-        console.log(e);
+        console.error(e);
         logVerificationErrorMessage(user.username, client);
     }
 };

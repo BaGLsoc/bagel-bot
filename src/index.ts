@@ -58,7 +58,7 @@ client.on("messageCreate", async (message) => {
 
         userInGuild
             ? console.log("user found: " + userInGuild.user.tag)
-            : console.log("user not found: " + userTag);
+            : console.error("user not found: " + userTag);
 
         // choose automatic or manual verification if user is in guild cache
         userInGuild
