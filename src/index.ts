@@ -19,66 +19,72 @@ export const client = new Client({
     ],
 });
 
-client.once("ready", () => {
-    console.log("Discord bot is ready! 🤖");
-    deployCommands({ guildId: config.GUILD_ID });
-});
+client
+    .once("ready", () => {
+        console.log("Discord bot is ready! 🤖");
+        deployCommands({ guildId: config.GUILD_ID });
+    })
+    .setMaxListeners(Infinity);
 
 /**
  * Watches for messages from webhook channel
  */
-client.on("messageCreate", async (message) => {
-    // ignores messages that aren't of format (don't include delimiters)
-    if (
-        message.channelId === config.WEBHOOK_CHANNEL &&
-        message.author.id === config.WEBHOOK_SENDER_ID
-    ) {
-        const data: string[] = message.content.split(":");
-        // const email: string = data[0];
-        // const name: string = data[1];
-        let userTag: string = data[2].trimEnd();
+client
+    .on("messageCreate", async (message) => {
+        // ignores messages that aren't of format (don't include delimiters)
+        if (
+            message.channelId === config.WEBHOOK_CHANNEL &&
+            message.author.id === config.WEBHOOK_SENDER_ID
+        ) {
+            const data: string[] = message.content.split(":");
+            // const email: string = data[0];
+            // const name: string = data[1];
+            let userTag: string = data[2].trimEnd();
 
-        // updated for new username strings
-        if (!userTag.includes("#")) userTag = userTag.toLowerCase() + "#0";
+            // updated for new username strings
+            if (!userTag.includes("#")) userTag = userTag.toLowerCase() + "#0";
 
-        // find the guild the user is in
-        const guild: Guild | undefined = client.guilds.cache.get(
-            config.GUILD_ID
-        );
-        if (!guild) {
-            logVerificationErrorMessage(userTag, client);
-            return;
+            // find the guild the user is in
+            const guild: Guild | undefined = client.guilds.cache.get(
+                config.GUILD_ID
+            );
+            if (!guild) {
+                logVerificationErrorMessage(userTag, client);
+                return;
+            }
+
+            // get list of all members of guild
+            const memberList = await guild.members.fetch({});
+            const userInGuild = memberList.find((u) => {
+                return u.user.tag === userTag;
+            });
+
+            userInGuild
+                ? console.log("user found: " + userInGuild.user.tag)
+                : console.error("user not found: " + userTag);
+
+            // choose automatic or manual verification if user is in guild cache
+            userInGuild
+                ? verifyUser(userInGuild.user, client, guild)
+                : logVerificationErrorMessage(userTag, client);
         }
-
-        // get list of all members of guild
-        const memberList = await guild.members.fetch({});
-        const userInGuild = memberList.find((u) => {
-            return u.user.tag === userTag;
-        });
-
-        userInGuild
-            ? console.log("user found: " + userInGuild.user.tag)
-            : console.error("user not found: " + userTag);
-
-        // choose automatic or manual verification if user is in guild cache
-        userInGuild
-            ? verifyUser(userInGuild.user, client, guild)
-            : logVerificationErrorMessage(userTag, client);
-    }
-});
+    })
+    .setMaxListeners(Infinity);
 
 /**
  * Run corresponding commands when new user interaction has been created
  */
-client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isCommand()) {
-        return;
-    }
-    const { commandName } = interaction;
-    if (commands[commandName as keyof typeof commands]) {
-        commands[commandName as keyof typeof commands].execute(interaction);
-    }
-});
+client
+    .on("interactionCreate", async (interaction) => {
+        if (!interaction.isCommand()) {
+            return;
+        }
+        const { commandName } = interaction;
+        if (commands[commandName as keyof typeof commands]) {
+            commands[commandName as keyof typeof commands].execute(interaction);
+        }
+    })
+    .setMaxListeners(Infinity);
 
 /**
  * Login the client using the bot token
