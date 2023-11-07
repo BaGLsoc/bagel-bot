@@ -30,13 +30,13 @@ client.once("ready", () => {
 client.on("messageCreate", async (message) => {
     // ignores messages that aren't of format (don't include delimiters)
     if (
-        message.channelId === config.WEBHOOK_CHANNEL &&
-        message.author.id === config.WEBHOOK_SENDER_ID
+        message.channelId === config.WEBHOOK_CHANNEL
+        // && message.author.id === config.WEBHOOK_SENDER_ID
     ) {
         const data: string[] = message.content.split(":");
         // const email: string = data[0];
         // const name: string = data[1];
-        let userTag: string = data[2];
+        let userTag: string = data[2].trimEnd();
 
         // updated for new username strings
         if (!userTag.includes("#")) userTag = userTag.toLowerCase() + "#0";
@@ -53,8 +53,12 @@ client.on("messageCreate", async (message) => {
         // get list of all members of guild
         const memberList = await guild.members.fetch({});
         const userInGuild = memberList.find((u) => {
-            return u.user.username + "#" + u.user.discriminator === userTag;
+            return u.user.tag === userTag;
         });
+
+        userInGuild
+            ? console.log("user found: " + userInGuild.user.tag)
+            : console.log("user not found: " + userTag);
 
         // choose automatic or manual verification if user is in guild cache
         userInGuild
